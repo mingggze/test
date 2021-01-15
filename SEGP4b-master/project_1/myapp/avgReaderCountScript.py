@@ -6,9 +6,12 @@ import requests
 def all_subset(query):
     from itertools import combinations
     subset = []
-    if len(query) > 2:
+    if len(query) > 2 and len(query) < 3:
         for i in set(combinations(query, r=2)):
             subset.append(i)
+        for i in set(combinations(query, r=1)):
+            subset.append(i)
+    elif len(query) < 2:
         for i in set(combinations(query, r=1)):
             subset.append(i)
     else:
@@ -52,7 +55,7 @@ def avgRCSList(queryList):
         print(str(query) + ": " + str(avgRCS) + " | published: " + str(paperCount) + " | avgyear: " + str(round(avgyear)))
 
         results = {
-
+           
             'subset':queryList_subset,
             'marks':resultList,
             'zipped':zip(queryList_subset,resultList),
@@ -109,13 +112,16 @@ def categoryscraper(cat):
         except Exception as e:
             #raise e
             print('')
-            
+           
+    """   
+    
         catresult = {
             'array':categoriesarr
         }
-
-    print(catresult)
-    return catresult
+    """
+   
+    
+    return categoriesarr
     
     
 
