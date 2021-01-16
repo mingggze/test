@@ -1,21 +1,10 @@
-from mendeley import Mendeley
-from datetime import datetime
-
-# get starting year(starting from last year)
-def getStartYear( setYear ):
-    year = current_year - setYear -1
-    return year
-    
-# get ending year(returns last year)
-def getEndYear():
-    year = current_year - 1
-    return year
+from myapp.mendeleyScript import *
 
 #check if paper is legal
-def isLegalType( pageType ):
+def isLegalType(pageType):
     legalTypes = [ "journal", "book", "generic", "book_section", "working_paper", "thesis"]
     for x in legalTypes:
-        if( x == pageType ):
+        if(x == pageType):
             return 1
     return 0
 
@@ -42,13 +31,15 @@ def calcAvgGrowth(years):
     i = len(years) - 2
     totalGrowth=0
     while i >= 0:
-        totalGrowth += ( (years[i]-years[i+1]) /years[i+1] )
+        totalGrowth += ((years[i]-years[i+1]) /years[i+1])
         i -= 1
-    avgGrowth = round( totalGrowth / (len(years)-1), 2 )
+    avgGrowth = round(totalGrowth / (len(years)-1), 2)
     return avgGrowth
 
 # calculate and return growth and average publication scores
 def scoresList(queryList, fromYear):
+    session = mendeleyAuth()
+    curryear = current_year()
     #dictionary containing lists needed to be returned
     results = {
         'singleTopics':[],
@@ -69,7 +60,7 @@ def scoresList(queryList, fromYear):
     results['allTopics'] += all_subset(queryList)
     #calculate scores for all queries
     for query in results['allTopics']:
-        pages = session.catalog.advanced_search(source=query, min_year=getStartYear( fromYear ), max_year=getEndYear(), view="stats" )
+        pages = session.catalog.advanced_search(source=query, min_year=getStartYear(fromYear), max_year=getEndYear(), view="stats" )
         #initialise new years list
         i = 0
         years = [None] * (fromYear+1) #contains all number of publications for all the years
@@ -79,19 +70,19 @@ def scoresList(queryList, fromYear):
         avgReaderPerYear = 0
         pubCount = 0
         for page in pages.iter(page_size=100):
-            if isLegalType( page.type ):
+            if isLegalType(page.type):
                 pubCount += 1
         #calculate average reader count per year
                 if page.reader_count != None and page.reader_count > 0 :
-                    avgReaderPerYear += page.reader_count / (current_year - page.year)
-                years[ (current_year-1) - page.year ] +=1
+                    avgReaderPerYear += page.reader_count / (curryear - page.year)
+                years[ (getCurrYear()-1)-page.year ] +=1
         #calculate average year of publications
         results['totalPub'].append( pubCount )
-        results['avgReaderC'].append( round(avgReaderPerYear) )
-        results['marks'].append( round( avgReaderPerYear / pubCount ,2) )
-        results['growth'].append( calcAvgGrowth(years) )
+        results['avgReaderC'].append(round(avgReaderPerYear))
+        results['marks'].append(round( avgReaderPerYear / pubCount ,2))
+        results['growth'].append(calcAvgGrowth(years))
     #zip results
-    results['zipped'] = zip( results['singleTopics'], results['marks'] )
+    results['zipped'] = zip(results['singleTopics'], results['marks'])
     return results
 
 # score s1
